@@ -1,31 +1,27 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { getLoginUrl } from "@/const";
-import { Streamdown } from 'streamdown';
+import Navbar from "@/components/Navbar";
+import HeroSection from "@/components/HeroSection";
+import SobreSection from "@/components/SobreSection";
+import GaleriaSection from "@/components/GaleriaSection";
+import BinhoVideoSection from "@/components/BinhoVideoSection";
+import PlanosSection from "@/components/PlanosSection";
+import DepoimentosSection from "@/components/DepoimentosSection";
+import FAQSection from "@/components/FAQSection";
+import CTAFinalSection from "@/components/CTAFinalSection";
+import Footer from "@/components/Footer";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
-
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
-
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
-      </main>
+    <div className="min-h-screen bg-[#1A1A1A] text-white">
+      <Navbar />
+      <HeroSection />
+      <SobreSection />
+      <GaleriaSection />
+      <BinhoVideoSection />
+      <PlanosSection />
+      <DepoimentosSection />
+      <FAQSection />
+      <CTAFinalSection />
+      <Footer />
     </div>
   );
 }
