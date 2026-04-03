@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, customers, subscriptions } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -90,3 +90,87 @@ export async function getUserByOpenId(openId: string) {
 }
 
 // TODO: add feature queries here as your schema grows.
+
+// ---- Customer helpers ----
+export async function createCustomer(data: { name: string; email: string; passwordHash: string; whatsapp: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(customers).values(data);
+  const result = await db.select().from(customers).where(eq(customers.email, data.email)).limit(1);
+  return result[0];
+}
+
+export async function getCustomerByEmail(email: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(customers).where(eq(customers.email, email)).limit(1);
+  return result[0] ?? undefined;
+}
+
+export async function getCustomerById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(customers).where(eq(customers.id, id)).limit(1);
+  return result[0] ?? undefined;
+}
+
+export async function updateCustomerAsaasId(customerId: number, asaasCustomerId: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(customers).set({ asaasCustomerId }).where(eq(customers.id, customerId));
+}
+
+// ---- Subscription helpers ----
+export async function createSubscription(data: {
+  customerId: number;
+  plan: "starter" | "pro" | "elite";
+  billingType: "PIX" | "CREDIT_CARD" | "BOLETO";
+  billingCycle?: "monthly" | "annual";
+  value: number;
+  status: "pending" | "active" | "overdue" | "cancelled" | "expired";
+  asaasSubscriptionId?: string;
+}) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(subscriptions).values({
+    customerId: data.customerId,
+    plan: data.plan,
+    billingType: data.billingType,
+    billingCycle: data.billingCycle ?? "monthly",
+    value: data.value,
+    status: data.status,
+    asaasSubscriptionId: data.asaasSubscriptionId,
+  });
+  const result = await db.select().from(subscriptions).where(eq(subscriptions.customerId, data.customerId)).limit(1);
+  return result[0];
+}
+
+export async function updateSubscriptionAsaasData(subId: number, asaasSubscriptionId: string, paymentLink: string) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(subscriptions).set({ asaasSubscriptionId, asaasPaymentLink: paymentLink }).where(eq(subscriptions.id, subId));
+}
+
+export async function getSubscriptionByCustomerId(customerId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(subscriptions).where(eq(subscriptions.customerId, customerId)).limit(1);
+  return result[0] ?? undefined;
+}
+
+export async function getSubscriptionByAsaasId(asaasSubscriptionId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(subscriptions).where(eq(subscriptions.asaasSubscriptionId, asaasSubscriptionId)).limit(1);
+  return result[0] ?? undefined;
+}
+
+export async function updateSubscriptionStatus(
+  subId: number,
+  status: "pending" | "active" | "overdue" | "cancelled" | "expired",
+  nextDueDate?: number
+) {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(subscriptions).set({ status, ...(nextDueDate ? { nextDueDate } : {}) }).where(eq(subscriptions.id, subId));
+}

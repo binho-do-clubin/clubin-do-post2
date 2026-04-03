@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 import { Check, Crown, Zap, Star } from "lucide-react";
+import RegisterModal from "@/components/RegisterModal";
 
 const DESCONTO_5 = "https://d2xsxph8kpxj0f.cloudfront.net/310519663311439862/J8VsyJC5BTcFB8HcV2fNGU/desconto-5_2f3db34f.png";
 const DESCONTO_10 = "https://d2xsxph8kpxj0f.cloudfront.net/310519663311439862/J8VsyJC5BTcFB8HcV2fNGU/desconto-10_941675c4.png";
@@ -85,7 +86,7 @@ const plans = [
   },
 ];
 
-function PlanCard({ plan, index, isAnnual }: { plan: typeof plans[0]; index: number; isAnnual: boolean }) {
+function PlanCard({ plan, index, isAnnual, onSelect }: { plan: typeof plans[0]; index: number; isAnnual: boolean; onSelect: (plan: string) => void }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-50px" });
   const price = isAnnual ? plan.annualPrice : plan.monthlyPrice;
@@ -168,10 +169,7 @@ function PlanCard({ plan, index, isAnnual }: { plan: typeof plans[0]; index: num
               : "bg-white/10 text-white hover:bg-white/20 border border-white/10"
           }`}
           style={{ fontFamily: "Poppins, sans-serif" }}
-          onClick={() => {
-            const msg = `Olá! Tenho interesse no Plano ${plan.name} do Clubin do Post.`;
-            window.open(`https://wa.me/5500000000000?text=${encodeURIComponent(msg)}`, "_blank");
-          }}
+          onClick={() => onSelect(plan.name.toLowerCase())}
         >
           {plan.cta}
         </button>
@@ -209,6 +207,7 @@ function PlanCard({ plan, index, isAnnual }: { plan: typeof plans[0]; index: num
 
 export default function PlanosSection() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [registerModal, setRegisterModal] = useState<{ open: boolean; plan: string }>({ open: false, plan: "pro" });
   const titleRef = useRef(null);
   const titleInView = useInView(titleRef, { once: true, margin: "-50px" });
 
@@ -273,7 +272,7 @@ export default function PlanosSection() {
         {/* Plans grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start mb-16">
           {plans.map((plan, i) => (
-            <PlanCard key={plan.name} plan={plan} index={i} isAnnual={isAnnual} />
+            <PlanCard key={plan.name} plan={plan} index={i} isAnnual={isAnnual} onSelect={(p) => setRegisterModal({ open: true, plan: p })} />
           ))}
         </div>
 
@@ -327,6 +326,13 @@ export default function PlanosSection() {
           </div>
         </motion.div>
       </div>
+
+      <RegisterModal
+        open={registerModal.open}
+        onClose={() => setRegisterModal({ open: false, plan: registerModal.plan })}
+        plan={registerModal.plan}
+        isAnnual={isAnnual}
+      />
     </section>
   );
 }

@@ -8,6 +8,13 @@
       "when": 1773659593865,
       "tag": "0000_yellow_slyde",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1775256146292,
+      "tag": "0001_acoustic_korath",
+      "breakpoints": true
     }
   ]
 }
